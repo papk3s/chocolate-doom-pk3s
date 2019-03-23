@@ -183,7 +183,7 @@ static txt_button_t *GetLaunchButton(void)
 {
     char *label;
 
-    switch (gamemission)
+    /*switch (gamemission)
     {
         case doom:
             label = "Save parameters and launch DOOM";
@@ -200,7 +200,8 @@ static txt_button_t *GetLaunchButton(void)
         default:
             label = "Save parameters and launch game";
             break;
-    }
+    }*/
+    label = "Save parameters and Exit";
 
     return TXT_NewButton2(label, LaunchDoom, NULL);
 }
@@ -241,7 +242,7 @@ void MainMenu(void)
         TXT_AddWidget(window, button);
     }
 
-    TXT_AddWidgets(window,
+    /*TXT_AddWidgets(window,
           GetLaunchButton(),
           TXT_NewStrut(0, 1),
           TXT_NewButton2("Start a Network Game", 
@@ -250,7 +251,7 @@ void MainMenu(void)
                          (TxtWidgetSignalFunc) JoinMultiGame, NULL),
           TXT_NewButton2("Multiplayer Configuration", 
                          (TxtWidgetSignalFunc) MultiplayerConfig, NULL),
-          NULL);
+          NULL);*/
 
     quit_action = TXT_NewWindowAction(KEY_BBUTTON, "Quit");
     warp_action = TXT_NewWindowAction(KEY_YBUTTON, "Warp");

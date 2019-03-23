@@ -33,8 +33,8 @@
 // NETWORKING
 //
 
-#include <SDL_net.h>
-
+//#include <SDL_net.h>
+/*
 #define DEFAULT_PORT 2342
 
 static boolean initted = false;
@@ -365,9 +365,9 @@ net_addr_t *NET_SDL_ResolveAddress(char *address)
         return NET_SDL_FindAddress(&ip);
     }
 }
-
+*/
 // Complete module
-
+/*
 net_module_t net_sdl_module =
 {
     NET_SDL_InitClient,
@@ -377,5 +377,14 @@ net_module_t net_sdl_module =
     NET_SDL_AddrToString,
     NET_SDL_FreeAddress,
     NET_SDL_ResolveAddress,
+};*/
+net_module_t net_sdl_module =
+{
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
 };
-

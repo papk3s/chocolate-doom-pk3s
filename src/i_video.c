@@ -51,6 +51,7 @@
 // Lookup table for mapping ASCII characters to their equivalent when
 // shift is pressed on an American layout keyboard:
 
+SDL_Surface* real_screen;
 static const char shiftxform[] =
 {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -1124,6 +1125,41 @@ void I_EndRead(void)
                SCREENWIDTH, SCREENHEIGHT);
 }
 
+#ifdef PAPK3S
+static void upscale_320xXXX_to_800x480(uint32_t *dst, uint32_t *src, uint32_t height)
+{
+    uint32_t Eh = 0;
+    uint32_t source = 0;
+    uint32_t dh = 0;
+    uint32_t y, x;
+    for (y = 0; y < 480; y++)
+    {
+        source = dh * 320/2;
+
+        for (x = 0; x < 800/10; x++)
+        {
+			register uint32_t ab, cd;
+			
+			__builtin_prefetch(dst + 4, 1);
+			__builtin_prefetch(src + source + 4, 0);
+
+            ab = src[source] & 0xF7DEF7DE;
+            cd = src[source + 1] & 0xF7DEF7DE;
+
+            *dst++ = (ab & 0xFFFF) | (ab << 16);
+            *dst++ = (((ab & 0xFFFF) >> 1) + ((ab & 0xFFFF0000) >> 17)) | (ab & 0xFFFF0000);
+            *dst++ = (ab >> 16) | (cd << 16);
+            *dst++ = (cd & 0xFFFF) | (((cd & 0xFFFF) << 15) + ((cd & 0xFFFF0000) >> 1));
+            *dst++ = (cd >> 16) | (cd & 0xFFFF0000);
+
+            source += 2;
+        }
+        Eh += height; if(Eh >= 480) { Eh -= 480; dh++; }
+    }
+}
+
+#endif
+
 //
 // I_FinishUpdate
 //
@@ -1203,7 +1239,12 @@ void I_FinishUpdate (void)
         SDL_BlitSurface(screenbuffer, NULL, screen, &dst_rect);
     }
 
-    SDL_Flip(screen);
+#ifdef PAPK3S
+	upscale_320xXXX_to_800x480(real_screen->pixels, screen->pixels, 200);
+#else
+	SDL_SoftStretch(screen, NULL, real_screen, NULL);
+#endif
+    SDL_Flip(real_screen);
 }
 
 
@@ -1958,6 +1999,8 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
     flags |= SDL_SWSURFACE | SDL_DOUBLEBUF;
 #endif
 
+	screen_bpp = 16;
+
     if (screen_bpp == 8)
     {
         flags |= SDL_HWPALETTE;
@@ -1978,9 +2021,21 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 #endif
     }
 
-    screen = SDL_SetVideoMode(w, h, screen_bpp, flags);
+#if defined(PAPK3S) || defined(AMINI)
 
-    if (screen == NULL)
+#ifdef PAPK3S
+	real_screen = SDL_SetVideoMode(800, 480, 16, SDL_HWSURFACE);
+#else
+	real_screen = SDL_SetVideoMode(480, 272, 16, SDL_HWSURFACE);
+#endif
+
+#else
+	real_screen = SDL_SetVideoMode(320, 240, 16, flags);
+#endif
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, screen_bpp, 0,0,0,0);
+	//screen = SDL_SetVideoMode(w, h, screen_bpp, flags);
+
+    if (real_screen == NULL)
     {
         I_Error("Error setting video mode %ix%ix%ibpp: %s\n",
                 w, h, screen_bpp, SDL_GetError());

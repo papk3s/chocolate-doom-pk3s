@@ -96,16 +96,16 @@ static int vidmode = 0;
 static char *video_driver = "";
 static char *window_position = "";
 static int autoadjust_video_settings = 1;
-static int aspect_ratio_correct = 1;
+static int aspect_ratio_correct = 0;
 static int fullscreen = 0;
 static int screen_width = 320;
-static int screen_height = 240;
+static int screen_height = 200;
 static int screen_bpp = 0;
 static int startup_delay = 0;
 static int usegamma = 0;
 
-int graphical_startup = 1;
-int show_endoom = 1;
+int graphical_startup = 0;
+int show_endoom = 0;
 int png_screenshots = 0;
 
 // These are the last screen width/height values that were chosen by the
